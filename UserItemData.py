@@ -72,3 +72,10 @@ class UserItemData:
             if line[1] == movie_id:
                 sum_of_ratings += line[2]
         return sum_of_ratings
+    
+    def get_number_of_users(self):
+        users = []
+        for line in self.data:
+            if line[0] not in users:
+                users.append(line[0])
+        return len(users)
