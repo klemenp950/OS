@@ -56,7 +56,7 @@ class ItemBasedPredictor:
         
         
         den = (den1 ** 0.5) * (den2 ** 0.5)
-        return num / den if den != 0 and counter >= self.__min_values and num / den > 0 else 0
+        return num / den if den != 0 and counter >= self.__min_values and num / den > self.__threshold else 0
     
     def similarity(self, i1, i2):
         return self.__similarity_matrix[self.__umid.index(i1)][self.__umid.index(i2)]
@@ -84,3 +84,12 @@ class ItemBasedPredictor:
                     predictions[el] = self.__matrix_ratings[self.__uuid.index(userID)][self.__umid.index(el)]
         else:
             return predictions
+        
+    def get_n_most_similar_movies(self, n):
+        return_dict = dict()
+        for i in range(len(self.__similarity_matrix)):
+            for j in range(i, len(self.__similarity_matrix[i])):
+                if i != j:
+                    return_dict[(self.__umid[i], self.__umid[j])] = self.__similarity_matrix[i][j]
+        
+        return dict(sorted(return_dict.items(), key=lambda x: x[1], reverse=True)[:n])

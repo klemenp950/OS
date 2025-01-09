@@ -12,7 +12,6 @@ print(uim.nrating())
 rp = ItemBasedPredictor()
 rec = Recommender(rp)
 rec.fit(uim)
-print("Predictions for 78: ")
-rec_items = rec.recommend(78, n=15, rec_seen=False)
-for idmovie, val in rec_items.items():
-    print("Film: {}, ocena: {}".format(md.get_title(idmovie), val))
+dict = rp.get_n_most_similar_movies(20)
+for (film1, film2), v in dict.items():
+    print("Film1:", md.get_title(int(film1)) + ", Film2:", md.get_title(int(film2)) + ", Podobnost:", v)
