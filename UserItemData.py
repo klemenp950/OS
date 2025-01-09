@@ -1,5 +1,6 @@
 import datetime
 import pickle
+import pandas as pd
 
 class UserItemData:
     def __init__(self, path=None, pickle_path=None, start_date='1.1.0001', end_date='31.12.9999', min_ratings=0):
@@ -23,27 +24,15 @@ class UserItemData:
                     if self.__start_date <= date <= self.__end_date:
                         data.append([int(userID), int(movieID), float(rating), date])
             
-            if self.__min_ratings == 0:
-                return data
-            
-            final_data = []
-            for line in data:
-                if self.get_number_of_ratings(data, line[1]) >= self.__min_ratings:
-                    final_data.append(line)
-            return final_data
+            df = pd.DataFrame(data, columns=['userID', 'movieID', 'rating', 'date'])
+            movie_counts = df['movieID'].value_counts()
+            valid_movies = movie_counts[movie_counts >= self.__min_ratings].index
+            df = df[df['movieID'].isin(valid_movies)]
+            return df
+        
         except FileNotFoundError:
             print('Error: File not found')
             return None
-    
-    def get_number_of_ratings(self ,data, movie_id):
-        counter = 0
-        for line in data:
-            if line[1] == movie_id:
-                counter += 1
-        return counter
-    
-    def nrating(self):
-        return len(self.data)
     
     def save_to_db(self, path):
         with open(path, 'wb') as f:
@@ -61,21 +50,30 @@ class UserItemData:
             return None
     
     def get_rating(self, user_id, movie_id):
-        for line in self.data:
-            if line[0] == user_id and line[1] == movie_id:
-                return line[2]
-        return None
-
-    def get_sum_of_ratings(self, data, movie_id):
-        sum_of_ratings = 0
-        for line in data:
-            if line[1] == movie_id:
-                sum_of_ratings += line[2]
-        return sum_of_ratings
+        rating = self.data[(self.data['userID'] == user_id) & (self.data['movieID'] == movie_id)]['rating']
+        if rating.empty:
+            return None
+        return rating.values[0]
     
     def get_number_of_users(self):
-        users = []
-        for line in self.data:
-            if line[0] not in users:
-                users.append(line[0])
-        return len(users)
+        return len(self.data['userID'].unique())
+    
+    def nrating(self):
+        return len(self.data)
+    
+    def get_sum_of_ratings(self, movie_id):
+        movie_ratings = self.data.groupby('movieID')['rating'].sum()
+        if movie_id in movie_ratings:
+            return movie_ratings[movie_id]
+        else:
+            return 0
+    
+    def get_number_of_ratings(self, movie_id):
+        movie_ratings_count = self.data.groupby('movieID')['rating'].count()
+        if movie_id in movie_ratings_count:
+            return movie_ratings_count[movie_id]
+        else:
+            return 0
+    
+    def get_avg_rating(self, movie_id):
+        return self.get_sum_of_ratings(movie_id) / self.get_number_of_ratings(movie_id)

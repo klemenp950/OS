@@ -1,10 +1,7 @@
-def count(array):
-    counter = 0
-    for i in array:
-        if i != 0:
-            counter += 1
-    return counter
+from UserItemData import UserItemData
+import pandas as pd
 
-array = [0, 5, 5, 5, 3, 0]
-
-print(sum(array)/count(array))
+uid = UserItemData('data/user_ratedmovies.dat')
+# pd.set_option('display.max_rows', None)
+for (_, (uid, mid, _, _)) in uid.data.iterrows():
+    print(uid, mid)

@@ -20,3 +20,6 @@ class MovieData:
             if int(line[0]) == id:
                 return line[1]
         return None
+
+    def get_ids_and_titles(self):
+        return [(int(line[0]), line[1]) for line in self.data]

@@ -3,24 +3,23 @@ from UserItemData import UserItemData
 
 class AveragePredictor:
     def __init__(self, b):
-        self.__uim = None
+        self.__uid = None
         self.__b = b
     
     def fit(self, uim):
-        self.__uim = uim
+        self.__uid = uim
         self.__ratings = dict()
         global_sum_of_ratings = 0
         global_counter = 0
         movie_dict = dict()  # movie_id: (number_of_ratings, sum_of_ratings)
         md = MovieData('data/movies.dat')
-        uid = UserItemData('data/user_ratedmovies.dat')
 
         for el in md.data:
             movie_id = int(el[0])
 
-            sum_of_ratings = uid.get_sum_of_ratings(uid.data, movie_id)
+            sum_of_ratings = self.__uid.get_sum_of_ratings(movie_id)
             global_sum_of_ratings += sum_of_ratings
-            number_of_ratings = uid.get_number_of_ratings(uid.data, movie_id)
+            number_of_ratings = self.__uid.get_number_of_ratings(movie_id)
             global_counter += number_of_ratings
 
             movie_dict[movie_id] = (number_of_ratings, sum_of_ratings)
@@ -30,7 +29,7 @@ class AveragePredictor:
                     self.__ratings[movie_id] = (sum_of_ratings + self.__b * global_avg) / (number_of_ratings + self.__b)
 
     def predict(self, user_id, rec_seen=True):
-        if self.__uim is None:
+        if self.__uid is None:
             raise ValueError("Error: fit() method was not called yet.")
         
         
@@ -38,7 +37,7 @@ class AveragePredictor:
         user_rated_movies = set()
 
         if not rec_seen:
-            for (uid, mid, _, _) in self.__uim.data:
+            for (_, (uid, mid, _, _)) in self.__uid.data.iterrows():
                 if uid == user_id:
                     user_rated_movies.add(mid)
 
