@@ -93,3 +93,10 @@ class ItemBasedPredictor:
                     return_dict[(self.__umid[i], self.__umid[j])] = self.__similarity_matrix[i][j]
         
         return dict(sorted(return_dict.items(), key=lambda x: x[1], reverse=True)[:n])
+    
+    def similar_items(self, item, n):
+        return_dict = dict()
+        for i in range(len(self.__similarity_matrix[self.__umid.index(item)])):
+            return_dict[self.__umid[i]] = self.__similarity_matrix[self.__umid.index(item)][i]
+        
+        return dict(sorted(return_dict.items(), key=lambda x: x[1], reverse=True)[1:n + 1])
